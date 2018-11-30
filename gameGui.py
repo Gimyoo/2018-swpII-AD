@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (QWidget, QApplication, QPushButton, QMessageBox,
 from PyQt5.QtCore import Qt
 
 
-from buttons import basicButton, downCard, holdCard
+from buttons import basicButton, downCard, handCard
 
 from dummy import Dummy
 from putCard import PutCard
@@ -16,6 +16,7 @@ class GUI(QWidget):
         super().__init__()
         self.warning = QMessageBox()
 
+        # Button
         self.startButton = basicButton('게임시작', self.startClicked)
         self.howToPlayButton = basicButton('게임방법', self.howClicked)
         self.exitButton = basicButton('게임종료', self.exitClicked)
@@ -25,23 +26,23 @@ class GUI(QWidget):
         self.hunToOne1 = QPushButton('100\n\n↓\n\n2')
         self.hunToOne2 = QPushButton('100\n\n↓\n\n2')
 
-        self.downOne1 = downCard('1', 0, self.downCardClicked)
-        self.downOne2 = downCard('1', 1, self.downCardClicked)
-        self.downHun1 = downCard('100', 2, self.downCardClicked)
-        self.downHun2 = downCard('100', 3, self.downCardClicked)
+        self.downCard = []
+        for i in range(4):
+            self.downCard.append(downCard('', i, self.downCardClicked))
 
         self.dummyDeck = QPushButton('남은 카드 수\n\n')
         self.dummyDeck.setFixedHeight(100)
         self.dummyDeck.setFixedWidth(80)
 
-        self.turnEnd = basicButton('턴 종료', self.turnEndClicked)
-        self.turnEnd.setFixedWidth(120)
+        self.turnEndButton = basicButton('턴 종료', self.turnEndClicked)
+        self.turnEndButton.setFixedWidth(120)
 
-        self.holdCard = []
+        self.handCard = []
         for i in range(8):
-            self.holdCard.append(holdCard('', self.holdCardClicked))
+            self.handCard.append(handCard('', self.handCardClicked))
 
 
+        # Layout
         menuLayout = QHBoxLayout()
         menuLayout.addWidget(self.startButton)
         menuLayout.addWidget(self.howToPlayButton)
@@ -53,32 +54,30 @@ class GUI(QWidget):
         basicCardLayout.addWidget(self.hunToOne1)
         basicCardLayout.addWidget(self.hunToOne2)
 
-        holdCardLayout = QHBoxLayout()
-        holdCardLayout.addWidget(self.downOne1)
-        holdCardLayout.addWidget(self.downOne2)
-        holdCardLayout.addWidget(self.downHun1)
-        holdCardLayout.addWidget(self.downHun2)
+        downCardLayout = QHBoxLayout()
+        for i in range(4):
+            downCardLayout.addWidget(self.downCard[i])
 
-        holdLayout = QVBoxLayout()
-        holdLayout.addLayout(basicCardLayout)
-        holdLayout.addLayout(holdCardLayout)
+        downLayout = QVBoxLayout()
+        downLayout.addLayout(basicCardLayout)
+        downLayout.addLayout(downCardLayout)
 
         dummyLayout = QHBoxLayout()
         dummyLayout.addWidget(self.dummyDeck)
 
         turnEndLayout = QVBoxLayout()
         turnEndLayout.addLayout(dummyLayout)
-        turnEndLayout.addWidget(self.turnEnd)
+        turnEndLayout.addWidget(self.turnEndButton)
 
         settingLayout = QHBoxLayout()
-        settingLayout.addLayout(holdLayout)
+        settingLayout.addLayout(downLayout)
         settingLayout.addStretch()
         settingLayout.addLayout(turnEndLayout)
         settingLayout.addStretch()
 
         handCardLayout = QHBoxLayout()
         for i in range(8):
-            handCardLayout.addWidget(self.holdCard[i])
+            handCardLayout.addWidget(self.handCard[i])
 
         mainLayout = QVBoxLayout()
         mainLayout.addLayout(menuLayout)
@@ -97,83 +96,99 @@ class GUI(QWidget):
 
     def gameStart(self):
         self.dummy = Dummy()
-        self.hand = self.dummy.returnHand() #getter메소드 만들기,,?
+        self.handCardList = self.dummy.getHandCardList()
 
-        self.putCard = PutCard(self.hand)
+        self.putCard = PutCard(self.handCardList)
+        self.downCardList = self.putCard.getDownCardList()
+
+        for i in range(4):
+            downCardNum = str(self.downCardList[i])
+            self.downCard[i].setText(downCardNum)
 
         for i in range(8):
-            self.holdCard[i].setText(str(self.hand[i]))
+            handCardNum = str(self.handCardList[i])
+            self.handCard[i].setText(handCardNum)
 
-        self.dummyDeck.setText('남은 카드 수\n\n'+ str(self.dummy.returnDeck()))
+        self.dummyDeck.setText('남은 카드 수\n\n'+ str(self.dummy.countDeck()))
 
 
     # esc눌러서 게임종료
     def keyPressEvent(self, e):
         if e.key() == Qt.Key_Escape:
-            self.close()
-
-
+            Endkey = self.warning.question(self, '', "정말로 종료하시겠습니까?", self.warning.Yes | self.warning.No)
+            if Endkey == self.warning.Yes:
+                self.close()
+            elif Endkey== self.warning.No:
+                pass
 
     #게임시작
     def startClicked(self):
-        self.downOne1.setText('1')
-        self.downOne2.setText('1')
-        self.downHun1.setText('100')
-        self.downHun2.setText('100')
-        #재시작할때 숫자 원래대로 돌림.
         self.gameStart()
 
 
     #게임방법
     def howClicked(self):
         self.warning.question(self, '게임방법',
-                              '# 게임규칙\n' +
-                              '2~98까지의 숫자가 적힌 카드 99장이 있다. '
-                              '1이 적힌 카드 위에는 오름차순에 해당되는 숫자카드만 둘 수 있고,' +
-                              '100이 적힌 카드 위에는 오름차순에 해당되는 숫자카드만 둘 수 있다.\n' +
-                              '즉, 앞의 두 카드에는 제일 위에 있는 숫자보다 큰 수만 둘 수 있고,' +
-                              '뒤의 두 카드에는 제일 위에 있는 숫자보다 작은 수만 둘 수 있다.\n' +
-                              '그러나 특수 규칙으로 앞의 두 카드에는 제일 위에 있는 숫자보다 정확히 10 작은 수를 둘 수 있고,'+
-                              '뒤의 두 카드에는 제일 위에 있는 숫자보다 정확히 10큰 수를 둘 수 있다.\n'
-                              '더미에 카드가 남아있다면 한 턴에 최소 2장이상 내려놓아야 턴을 종료할 수 있다.\n\n' +
-                              '# 승리\n' +
-                              '더미에 남아 있는 카드 수가 0이되고, 플레이어가 가진 카드도 모두 내려놓으면 승리한다.\n\n' +
-                              '# 패배\n' +
-                              '더미 또는 플레이어의 덱에 카드가 남아 있는데 더 이상 내려놓을 수 있는 카드가 없다면 패배한다.', QMessageBox.Yes)
+                              '# 게임의 진행\n' +
+                              '2~98까지의 숫자카드 98장을 잘 섞어 더미를 만들고 플레이어에게 8장을 나누어 줍니다.' +
+                              '한 차례에 최소 2장의 카드를 내려놓아야합니다.' +
+                              '원한다면 더 많은 카드를 내려놓을 수 있습니다.' +
+                              '카드를 내려놓을 때는 한 번에 한 장씩 내려놓아야 하며, 내려놓을 때마다 원하는 위치를 선택한 뒤, 내려고하는 카드를 선택합니다.' +
+                              '오름차순 위치에 카드를 놓을 때는 반드시 이전에 놓인 카드보다 높은 숫자를 놓아야 합니다.' +
+                              '내림차순 위치는 오름차순 위치와 반대로 이전에 놓인 카드보다 낮은 숫자를 놓아야 합니다.'+
+                              '카드를 조건에 맞게 내려놓았다면 차례를 마칠 수 있습니다.'
+                              '차례를 종료하면 이번에 내려놓은 만큼의 카드를 더미에서 가져옵니다.\n\n' +
+
+                              '#되돌리기 규칙\n' +
+                              '일반적으로는 열마다 정해진 규칙대로 카드를 놓아야 하지만, 되돌리기 규칙에 해당하는 카드는 일반 규칙을 무시하고 놓을 수 있습니다.' +
+                              '-오름차순 위치: 현재 위치에 표시된 카드보다 정확히 10이 낮은 카드를 낼 수 있습니다.' +
+                              '-내림차순 위치: 현재 위치에 표시된 카드보다 정확히 10이 높은 카드를 낼 수 있습니다.\n\n' +
+
+                              '#게임의 종료\n' +
+                              '숫자 카드 더미가 떨어지면, 더 이상 카드를 뽑지 않고 게임을 진행합니다.'+
+                              '만약 한 차례에 놓아야 하는 최소한의 카드를 내려놓을 수 없다면(카드 더미가 남아있다면 2장, 카드 더미가 없다면 1장)'+
+                              '게임은 즉시 종료되고 플레이어는 게임에서 패배합니다.'+
+                              '만약 플레이어가 자신의 카드를 전부 내려놓았다면, 플레이어들의 승리입니다.'
+
+                              , QMessageBox.Yes)
 
 
 
     #게임종료
     def exitClicked(self):
-        self.close()
+        #정말 종료하시겠습니까?
+        Endkey = self.warning.question(self, '', "정말로 종료하시겠습니까?", self.warning.Yes | self.warning.No)
+        if Endkey== self.warning.Yes:
+            self.close()
+        elif Endkey== self.warning.No:
+            pass
 
 
 
     #턴 종료
     def turnEndClicked(self):
-        self.putCount = self.putCard.putCount
-        self.hand = self.dummy.returnHand()
-
+        self.putCount = self.putCard.getPutCount()
+        self.handCardList = self.dummy.getHandCardList()
 
         if self.putCount >= 2:
-            self.dummy.takeCard(self.hand)
+            self.dummy.takeCard(self.handCardList)
 
-            self.deckNum = self.dummy.returnDeck()
+            self.deckNum = self.dummy.countDeck()
 
             self.dummyDeck.setText('남은 카드 수\n\n' + str(self.deckNum))
             for i in range(8):
-                self.holdCard[i].setText(self.hand[i])
-                self.holdCard[i].setEnabled(False)
-            self.putCard.basicCount()
+                self.handCard[i].setText(self.handCardList[i])
+                self.handCard[i].setEnabled(False)
+            self.putCard.resetPutCount()
 
-            if self.putCard.guess(self.hand, self.deckNum) == False: #여긴 덱 장수 신경안씀
+            if self.putCard.guess(self.handCardList, self.deckNum) == False: #여긴 덱 장수 신경안씀
                 self.warning.question(self, 'Game Over', 'You lose', QMessageBox.Yes)
                 #self.startClicked() #게임 자동초기화
             else:
                 pass
         else:
             self.warning.question(self, 'Error', '두 장 이상의 카드를 옮긴 후 종료 할 수 있습니다.', QMessageBox.Yes)
-            self.dummyDeck.setText('남은 카드 수\n\n' + str(self.dummy.returnDeck()))
+            self.dummyDeck.setText('남은 카드 수\n\n' + str(self.dummy.countDeck()))
 
 
 
@@ -182,11 +197,11 @@ class GUI(QWidget):
     def downCardClicked(self):
         self.downLocation = self.sender()
         for i in range(8):
-            self.holdCard[i].setEnabled(True)
+            self.handCard[i].setEnabled(True)
 
 
     # 사용자의 덱에 있는 카드
-    def holdCardClicked(self):
+    def handCardClicked(self):
         self.holdNum = self.sender()
 
         try:
@@ -199,15 +214,15 @@ class GUI(QWidget):
                 self.holdNum.setText('')
 
             for i in range(8):
-                self.holdCard[i].setEnabled(False)
+                self.handCard[i].setEnabled(False)
 
-            self.hand = self.dummy.returnHand()
-            self.deckNum = self.dummy.returnDeck()
+            self.handCardList = self.dummy.getHandCardList()
+            self.deckNum = self.dummy.countDeck()
 
-            if self.deckNum == 0 and self.hand.count('')== 8:
+            if self.deckNum == 0 and self.handCardList.count('')== 8:
                 self.warning.question(self, 'Game Over', 'You Win (ﾉﾟ▽ﾟ)ﾉ', QMessageBox.Yes)
                 #self.startClicked() #게임 자동초기화
-            elif self.putCard.guess(self.hand, self.deckNum)== False and self.deckNum == 0:
+            elif self.putCard.guess(self.handCardList, self.deckNum)== False and self.deckNum == 0:
                 self.warning.question(self, 'Game Over', 'You lose', QMessageBox.Yes)#여기선 덱이 0장일때만 승패관리함
                 #self.startClicked() #게임 자동초기화
             else:
