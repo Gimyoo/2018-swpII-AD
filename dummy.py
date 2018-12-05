@@ -3,6 +3,7 @@ import random
 class Dummy:
     def __init__(self):
         self.deck = []
+
         for i in range(2,100):
             self.deck.append(str(i))
         random.shuffle(self.deck)
@@ -42,4 +43,3 @@ class Dummy:
     #     for i in range(len(self.handCard)):
     #         HandCard += (str(self.handCard[i]) + ' ')
     #     return HandCard
-
