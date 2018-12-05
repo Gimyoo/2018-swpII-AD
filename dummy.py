@@ -3,9 +3,10 @@ import random
 class Dummy:
     def __init__(self):
         self.deck = []
-        #for i in range(2,100):
-        #    self.deck.append(str(i))
-        #random.shuffle(self.deck)
+
+        for i in range(2,100):
+            self.deck.append(str(i))
+        random.shuffle(self.deck)
         self.handCardList = []
         self.handCardList = self.deck[:8]
         self.deck= self.deck[8:]

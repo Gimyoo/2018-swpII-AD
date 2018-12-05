@@ -14,7 +14,7 @@ class downCard(basicButton):
         self.setFixedHeight(100)
         self.setFixedWidth(80)
 
-class holdCard(basicButton):
+class handCard(basicButton):
     def __init__(self, text, callback):
         super().__init__(text, callback)
         self.setEnabled(False)

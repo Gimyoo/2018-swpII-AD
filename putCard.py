@@ -65,6 +65,23 @@ class PutCard:
                 #    count += 1
                 #elif (c + 10) in cardlist:
                 #    count += 1
+            if cardlist[i] == '':
+                continue
+            else:
+                c = int(cardlist[i])
+
+            if c + 10 == self.downCardList[0] or c > self.downCardList[0]:
+                count += 1
+            elif c + 10 == self.downCardList[1] or c > self.downCardList[1]:
+                count += 1
+            elif c - 10 == self.downCardList[2] or c < self.downCardList[2]:
+                count += 1
+            elif c - 10 == self.downCardList[3] or c < self.downCardList[3]:
+                count += 1
+            elif (c - 10) in cardlist:
+                count += 1
+            elif (c + 10) in cardlist:
+                count += 1
 
 
         # print(self.cardList[0] , self.cardList[1], self.cardList[2], self.cardList[3])

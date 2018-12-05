@@ -115,11 +115,14 @@ class GUI(QWidget):
     # esc눌러서 게임종료
     def keyPressEvent(self, e):
         if e.key() == Qt.Key_Escape:
+
             Endkey = self.warning.question(self, '', "정말로 종료하시겠습니까?", self.warning.Yes | self.warning.No)
             if Endkey == self.warning.Yes:
                 self.close()
             elif Endkey== self.warning.No:
                 pass
+            #정말 종료하시겠습니까?
+            self.close()
 
     #게임시작
     def startClicked(self):
@@ -162,6 +165,7 @@ class GUI(QWidget):
             self.close()
         elif Endkey== self.warning.No:
             pass
+        self.close()
 
 
 
