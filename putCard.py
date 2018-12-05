@@ -65,29 +65,8 @@ class PutCard:
                 #    count += 1
                 #elif (c + 10) in cardlist:
                 #    count += 1
-            if cardlist[i] == '':
-                continue
-            else:
-                c = int(cardlist[i])
-
-            if c + 10 == self.downCardList[0] or c > self.downCardList[0]:
-                count += 1
-            elif c + 10 == self.downCardList[1] or c > self.downCardList[1]:
-                count += 1
-            elif c - 10 == self.downCardList[2] or c < self.downCardList[2]:
-                count += 1
-            elif c - 10 == self.downCardList[3] or c < self.downCardList[3]:
-                count += 1
-            elif (c - 10) in cardlist:
-                count += 1
-            elif (c + 10) in cardlist:
-                count += 1
-
-
-        # print(self.cardList[0] , self.cardList[1], self.cardList[2], self.cardList[3])
-        # print(count)
-        print(count)
-
+	#print(count)
+	
         if count < 2 and deckNum > 0:
             return False
         elif count < 1 and deckNum == 0: #덱 0장일때는 1개만 가능해도 메세지 안뜨게 처리
