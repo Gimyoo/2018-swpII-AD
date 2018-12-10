@@ -9,15 +9,11 @@ class Dummy:
         random.shuffle(self.deck)
         self.handCardList = []
         self.handCardList = self.deck[:8]
-        self.deck= self.deck[8:]
+        self.deck = self.deck[8:]
 
 
     def getHandCardList(self):
         return self.handCardList
-
-
-    def countDeck(self):
-        return len(self.deck) #int
 
 
     def takenCard(self, num):
@@ -37,9 +33,6 @@ class Dummy:
         self.handCardList = hand
 
 
-
-    # def displayHandCard(self):
-    #     HandCard = ''
-    #     for i in range(len(self.handCard)):
-    #         HandCard += (str(self.handCard[i]) + ' ')
-    #     return HandCard
+    def countDeck(self):
+        lenDeck = len(self.deck)
+        return lenDeck #int
