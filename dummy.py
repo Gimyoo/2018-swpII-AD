@@ -12,10 +12,6 @@ class Dummy:
         self.deck = self.deck[8:]
 
 
-    def getHandCardList(self):
-        return self.handCardList
-
-
     def takenCard(self, num):
         idx = self.handCardList.index(num)
         self.handCardList[idx] = ''
@@ -36,3 +32,7 @@ class Dummy:
     def countDeck(self):
         lenDeck = len(self.deck)
         return lenDeck #int
+
+
+    def getHandCardList(self):
+        return self.handCardList
