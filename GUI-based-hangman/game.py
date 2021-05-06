@@ -5,18 +5,13 @@ from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5.QtWidgets import QLayout, QGridLayout
 from PyQt5.QtWidgets import QTextEdit, QLineEdit, QToolButton
 
-from hangman import Hangman
 from guess import Guess
-from word import Word
 
 
 class HangmanGame(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-
-        # Initialize word database        
-        self.word = Word('words.txt')
 
         # Hangman display window
         self.hangmanWindow = QTextEdit()
@@ -88,66 +83,57 @@ class HangmanGame(QWidget):
 
 
     def startGame(self):
-        self.hangman = Hangman()
-        self.guess = Guess(self.word.randFromDB())
+        self.logic = Guess()
+        hangmanShape = self.logic.lifeData.currentShape()
+        self.hangmanWindow.setPlaceholderText(hangmanShape)
         self.gameOver = False
         self.currentWord.setFixedWidth(350)
-        self.hangmanWindow.setPlaceholderText(self.hangman.currentShape())
-        self.currentWord.setText(self.guess.displayCurrent())
-        self.guessedChars.setText(self.guess.displayGuessed())
+        self.currentWord.setText(self.logic.wordData.getCurrentStatus())
+        self.guessedChars.setText(self.logic.wordData.getGuessedChars())
         self.message.clear()
-
+        return
 
     def guessClicked(self):
-        guessedChar = self.charInput.text()
+        char = self.charInput.text()
         self.charInput.clear()
         self.message.clear()
 
         if self.gameOver == True:
-            # 메시지 출력하고 - message.setText() - 리턴
             self.message.setText('Game over')
             return
 
+        status = self.logic.guess(char)
 
-        # 입력의 길이가 1 인지를 판단하고, 아닌 경우 메시지 출력, 리턴
-        if len(guessedChar) != 1 :
-            self.message.setText('One charater at a time!')
+        if status == 'WRONG':
+            self.message.setText('You entered wrong value!')
             return
 
-
-        if guessedChar.isupper():
-            guessedChar = guessedChar.lower()
-
-        
-        # 이미 사용한 글자인지를 판단하고, 아닌 경우 메시지 출력, 리턴
-        if guessedChar in self.guess.displayGuessed():
-            self.message.setText('You already guessed \"' + guessedChar + '\"')
+        if status == 'OVERLAP':
+            self.message.setText('You already guessed \"' + char + '\"')
             return
 
-
-        success = self.guess.guess(guessedChar)
-        if success == False:
-            # 남아 있는 목숨을 1 만큼 감소
-            # 메시지 출력
-            self.hangman.decreaseLife();
+        if status == 'FAIL':
+            self.message.setText('\"' + char + '\" is not in secret word.')
 
 
-        # hangmanWindow 에 현재 hangman 상태 그림을 출력
-        self.hangmanWindow.setPlaceholderText(self.hangman.currentShape())
+        hangmanShape = self.logic.lifeData.currentShape()
+        self.hangmanWindow.setPlaceholderText(hangmanShape)
 
-        # currentWord 에 현재까지 부분적으로 맞추어진 단어 상태를 출력
-        self.currentWord.setText(self.guess.displayCurrent())
+        currentStatus = self.logic.wordData.getCurrentStatus()
+        self.currentWord.setText(currentStatus)
 
-        # guessedChars 에 지금까지 이용한 글자들의 집합을 출력
-        self.guessedChars.setText(self.guess.displayGuessed())
+        guessedChars = self.logic.wordData.getGuessedChars()
+        self.guessedChars.setText(guessedChars)
 
-        if self.guess.finished():
-            self.message.setText('Success!')
+        if self.logic.finished():
+            self.message.setText('You Win!')
             self.gameOver = True
 
-        elif self.hangman.getRemainingLives() == 0:
-            self.message.setText('Fail!')
+        elif self.logic.lifeData.getRemainingLives() == 0:
+            self.message.setText('Game Over...')
             self.gameOver = True
+
+        return
 
 
 

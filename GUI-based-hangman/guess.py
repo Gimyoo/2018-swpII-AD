@@ -1,47 +1,43 @@
-class Guess:
+from model import Word
+from model import Data
+from model import Hangman
 
-    def __init__(self, word):
-        self.secretWord = word
-        self.currentStatus = '_' * len(word)
-        self.guessedChars = set()
+class Guess:
+    def __init__(self):
+        self.word = Word('words.txt')
+        self.wordData = Data(self.word.randFromDB())
+        self.lifeData = Hangman()
         self.guess('')
 
+    def guess(self, char):
+        secretWord = self.wordData.getSecretWord()
 
-    def guess(self, character):
-        self.guessedChars.add(character)
-        if character not in self.secretWord:
-            return False
+        if len(char) != 1:
+            return 'WRONG'
+
+        char.lower()
+
+        guessedChars = self.wordData.getGuessedChars()
+        if char in guessedChars:
+            return 'OVERLAP'
+
+        self.wordData.setGuessedChars(char)
+
+        if char not in secretWord:
+            self.lifeData.decreaseLife()
+            return 'FAIL'
         else:
-            currentStatus = ''
-            matches = 0
-            for c in self.secretWord:
-                if c in self.guessedChars:
-                    currentStatus += c
-                else:
-                    currentStatus += '_'
-
-            self.currentStatus = currentStatus
-
-            return True
+            self.wordData.setCurrentStatus()
+            return 'SUCCESS'
 
     # 게임 종료
     def finished(self):
-        if self.currentStatus == self.secretWord:
+        currentStatus = self.wordData.getCurrentStatus()
+        secretWord = self.wordData.getSecretWord()
+        if currentStatus == secretWord:
             return True
         else:
             return False
 
-    # 현재까지 맞춘 비밀단어의 상태
-    def displayCurrent(self):
-        guessWord = ''
-        for c in self.currentStatus:
-            guessWord += (c + ' ')
-        return guessWord
 
-    # 현재까지 입력한 단어를 오름차순으로 출력
-    def displayGuessed(self):
-        guessed = ''
-        for c in sorted(list(self.guessedChars)):
-            guessed += (c + ' ')
-        return guessed
 
