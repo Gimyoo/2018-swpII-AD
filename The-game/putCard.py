@@ -36,7 +36,8 @@ class PutCard:
         OneToHun2 = self.downCardList[1]
         HunToOne1 = self.downCardList[2]
         HunToOne2 = self.downCardList[3]
-	cardlist = sorted(cardlist)
+
+        cardlist = sorted(cardlist)
 
         for i in range(len(cardlist)):
             for j in range(len(cardlist)):
